@@ -1,0 +1,36 @@
+services:
+  mysql-cart:
+    image: mysql:latest
+    restart: always
+    container_name: mysql-cart
+    hostname: "mysql-cart"
+    environment:
+      MYSQL_DATABASE: 'cartdb'
+      MYSQL_USER: 'cartuser'
+      MYSQL_PASSWORD: '12345'
+      MYSQL_ROOT_PASSWORD: '54321'
+    ports:
+      - '3309:3309'
+    networks:
+      - my_network
+
+
+  mscart:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql-cart
+    hostname: "ms-cart"
+    environment:
+      MYSQL_HOSTNAME: mysql-cart
+      MYSQL_PORT: 3309
+    ports:
+      - 8083:8083
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
+    external: true
