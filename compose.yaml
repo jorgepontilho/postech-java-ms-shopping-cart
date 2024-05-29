@@ -6,7 +6,7 @@ services:
     hostname: "mysql-cart"
     environment:
       MYSQL_DATABASE: 'cartdb'
-      MYSQL_USER: 'cartuser'
+      MYSQL_USER: 'cartuser_mysql'
       MYSQL_PASSWORD: 'mSq@2024*PtEc'
       MYSQL_ROOT_PASSWORD: 'mSqR@@t*2024p@s'
     ports:
