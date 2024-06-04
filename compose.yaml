@@ -9,10 +9,8 @@ services:
       MYSQL_USER: 'cartuser_mysql'
       MYSQL_PASSWORD: 'mSq@2024*PtEc'
       MYSQL_ROOT_PASSWORD: 'mSqR@@t*2024p@s'
-      MSUSER_HOSTNAME: ms-user
-      MSUSER_PORT: 8080
     ports:
-      - '3309:3309'
+      - '3308:3306'
     networks:
       - my_network
 
@@ -26,9 +24,11 @@ services:
     hostname: "ms-cart"
     environment:
       MYSQL_HOSTNAME: mysql-cart
-      MYSQL_PORT: 3309
+      MYSQL_PORT: 3308
+      MSUSER_HOSTNAME: ms-user
+      MSUSER_PORT: 8080
     ports:
-      - 8083:8083
+      - 8082:8082
     networks:
       - my_network
 

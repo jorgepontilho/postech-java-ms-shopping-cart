@@ -29,4 +29,4 @@ RUN apt-get update -y \
     && chmod +x /usr/local/bin/wait-for-it.sh
 
 # Aguardando até que o banco inicie antes de iniciar a aplicação
-CMD ["/bin/bash", "-c", "wait-for-it.sh -t 0 mysql-cart:3309 -- java -jar mscart.jar"]
+CMD ["/bin/bash", "-c", "wait-for-it.sh -t 0 mysql-cart:3308 -- java -jar mscart.jar"]

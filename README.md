@@ -36,10 +36,10 @@ Assim que o processo for concluído, tanto a aplicação quanto o banco de dados
 ## Documentação
 
 A documentação detalhada da API está acessível na URL:
-http://localhost:8083/swagger-ui/index.html
+http://localhost:8082/swagger-ui/index.html
 
 ## Portas configuradas
 
-App: http://localhost:8083
+App: http://localhost:8082
 
-MySQL: jdbc:mysql://localhost:3309/cartdb
+MySQL: jdbc:mysql://localhost:3308/cartdb
