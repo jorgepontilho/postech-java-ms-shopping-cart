@@ -14,5 +14,4 @@ public class CartItem {
     private Cart cart;
     private Long productId;
     private int quantity;
-    // ... other fields (e.g., price, name, image)
 }

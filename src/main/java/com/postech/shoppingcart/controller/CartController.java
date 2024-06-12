@@ -43,11 +43,22 @@ public class CartController {
             throw e;
         }
     }
+
     @GetMapping("/{cartId}")
-    public ResponseEntity<CartDTO> getCart(@PathVariable String cartId) {
+    public ResponseEntity<CartDTO> getCart(@PathVariable Long cartId) {
         Cart cart = cartService.getCart(cartId);
         CartDTO cartDTO = cartMapper.toDTO(cart);
         return ResponseEntity.ok(cartDTO);
+    }
+
+    @DeleteMapping("/{cartId}")
+    //@PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
+        // Retrieve cart from the database
+        Cart cart = cartService.getCart(cartId);
+
+        cartService.deleteCart(cartId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{cartId}/items")
@@ -55,6 +66,5 @@ public class CartController {
         return;
     }
 
-    // ... other endpoints
 }
 

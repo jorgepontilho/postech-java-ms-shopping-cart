@@ -9,7 +9,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartDTO {
 
-    private String cartId;
+    private Long cartId;
     private Long userId;
     private List<CartItemDTO> items;
     private double subtotal;
