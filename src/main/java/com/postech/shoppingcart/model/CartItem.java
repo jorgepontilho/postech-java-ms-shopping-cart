@@ -1,11 +1,13 @@
 package com.postech.shoppingcart.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Entity
+@Data
+@Table(name = "cart_item")
 public class CartItem {
     @Id
     @GeneratedValue
@@ -14,4 +16,5 @@ public class CartItem {
     private Cart cart;
     private Long productId;
     private int quantity;
+    private BigDecimal price;
 }

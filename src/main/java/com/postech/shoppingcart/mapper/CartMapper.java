@@ -10,7 +10,6 @@ public interface CartMapper {
 
     CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);
 
-
-    CartDTO toDTO(Cart cart);
-    Cart toEntity(CartDTO cartDTO);
+    CartDTO toCartDTO(Cart cart);
+    Cart toCart(CartDTO cartDTO);
 }
