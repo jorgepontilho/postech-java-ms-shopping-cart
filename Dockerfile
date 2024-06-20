@@ -19,14 +19,14 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar /app/mscart.jar
 
-#CMD ["java", "-jar", "/app/mscart.jar"]
+CMD ["java", "-jar", "/app/mscart.jar"]
 
 
 # Instalando wait-for-it.sh para poder esperar o banco de dados
-RUN apt-get update -y \
-    && apt-get install -y wget netcat \
-    && wget -O /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
-    && chmod +x /usr/local/bin/wait-for-it.sh
+#RUN apt-get update -y \
+#    && apt-get install -y wget netcat \
+#    && wget -O /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+#    && chmod +x /usr/local/bin/wait-for-it.sh
 
 # Aguardando até que o banco inicie antes de iniciar a aplicação
-CMD ["/bin/bash", "-c", "wait-for-it.sh -t 0 mysql-cart:3308 -- java -jar mscart.jar"]
+#CMD ["/bin/bash", "-c", "wait-for-it.sh -t 0 mysql-cart:3308 -- java -jar mscart.jar"]

@@ -11,6 +11,11 @@ services:
       MYSQL_ROOT_PASSWORD: 'mSqR@@t*2024p@s'
     ports:
       - '3308:3306'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "mysql-cart" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     networks:
       - my_network
 
@@ -20,11 +25,12 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - mysql-cart
+      mysql-cart:
+        condition: service_healthy
     hostname: "ms-cart"
     environment:
       MYSQL_HOSTNAME: mysql-cart
-      MYSQL_PORT: 3308
+      MYSQL_PORT: 3306
       MSUSER_HOSTNAME: ms-user
       MSUSER_PORT: 8080
     ports:
