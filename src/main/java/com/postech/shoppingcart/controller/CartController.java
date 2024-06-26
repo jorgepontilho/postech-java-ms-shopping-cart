@@ -2,15 +2,12 @@ package com.postech.shoppingcart.controller;
 
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
-import com.postech.shoppingcart.mapper.CartMapper;
-import com.postech.shoppingcart.model.Cart;
-import com.postech.shoppingcart.model.CartItem;
+import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +64,6 @@ public class CartController {
             @ApiResponse(description = "Cart does not exists", responseCode = "204", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
     })
     @DeleteMapping("/{cartId}")
-    //@PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
 
         try {
@@ -79,14 +75,34 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @Operation(summary = "Add new item to cart", responses = {
+            @ApiResponse(description = "The cart item was added", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
+            @ApiResponse(description = "Cart does not exists", responseCode = "204", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
+    })
     @PostMapping("/{cartId}/items")
     public ResponseEntity<?> addItem(@PathVariable Long cartId, @RequestBody CartItemDTO request) {
         try {
             CartDTO updatedCart = cartService.addItemToCart(cartId, request);
-            return ResponseEntity.ok(updatedCart); // Return the updated cart (optional)
+            return ResponseEntity.ok(updatedCart);
         } catch (Exception e) {
             log.error("Error adding item", e);
             throw new RuntimeException(e);
+        }
+    }
+
+
+    @DeleteMapping("/{cartId}/items/{itemId}")
+    public ResponseEntity<?> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
+        try {
+            CartDTO updatedCart = cartService.removeItemFromCart(cartId, itemId);
+            return ResponseEntity.ok(updatedCart);
+        } catch (ContentNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Error removing item from cart: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while removing the item from the cart.");
         }
     }
 

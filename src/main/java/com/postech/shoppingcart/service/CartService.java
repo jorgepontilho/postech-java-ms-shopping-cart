@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -61,11 +62,12 @@ public class CartService {
             Cart cart = cartRepository.findById(cartId)
                     .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
 
-            // Validate cartItemDTO (quantity > 0, product exists)
+            // Validate cartItemDTO ( product exists)
             CartItem cartItem = cartItemService.createOrUpdateCartItem(cart, cartItemDTO);
 
+            cart.getItems().add(cartItem);
             // Recalculate cart total
-
+            cart.setTotal(calculateCartTotal(cart.getItems()));
             cart = cartRepository.save(cart);
 
             return CartMapper.INSTANCE.toCartDTO(cart);
@@ -75,12 +77,31 @@ public class CartService {
         }
     }
 
-    public void updateItemQuantity(String cartId, Long productId, int quantity) {
+    public CartDTO updateItemQuantity(String cartId, Long productId, int quantity) {
         throw new NotImplementedException();
     }
 
-    public void removeItemFromCart(String cartId, Long productId) {
-        throw new NotImplementedException();
+    public CartDTO removeItemFromCart(Long cartId, Long itemId) {
+        try {
+            log.info("Removing item from cart: {}", cartId);
+            Cart cart = cartRepository.findById(cartId)
+                    .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
+
+            cartItemService.removeItem(itemId, cart);
+
+            // Recalculate cart total
+            cart.setTotal(calculateCartTotal(cart.getItems()));
+
+            cart = cartRepository.save(cart);
+
+            return CartMapper.INSTANCE.toCartDTO(cart);
+        } catch (ContentNotFoundException e) {
+            log.error("Error removing item from cart: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error removing item from cart: {}", e.getMessage());
+            throw e;
+        }
     }
 
 
@@ -93,7 +114,19 @@ public class CartService {
         }
     }
 
-    public double calculateCartTotal(Cart cart) {
-        throw new NotImplementedException();
+    private BigDecimal calculateCartTotal(List<CartItem> items) {
+        try {
+            return items.stream()
+                    .map(this::calculateItemTotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } catch (Exception e) {
+            log.error("Unexpected error calculating cart total: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BigDecimal calculateItemTotal(CartItem item) {
+        BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+        return item.getPrice().multiply(quantity);
     }
 }

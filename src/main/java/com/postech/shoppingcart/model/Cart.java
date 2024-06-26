@@ -27,4 +27,10 @@ public class Cart {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+
+    public void removeItem(CartItem itemToRemove) {
+        items.remove(itemToRemove);
+        itemToRemove.setCart(null);
+    }
+
 }

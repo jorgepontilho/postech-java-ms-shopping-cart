@@ -1,19 +1,12 @@
 package com.postech.shoppingcart.service;
 
-import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
-import com.postech.shoppingcart.exception.BadRequestException;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
-import com.postech.shoppingcart.mapper.CartMapper;
 import com.postech.shoppingcart.model.Cart;
 import com.postech.shoppingcart.model.CartItem;
 import com.postech.shoppingcart.repository.CartItemRepository;
-import com.postech.shoppingcart.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -31,23 +24,43 @@ public class CartItemService {
                     .filter(item -> item.getProductId().equals(cartItemDTO.getProductId()))
                     .findFirst();
 
-            CartItem item;
-            if (existingCartItem.isPresent()) {
-                // If the item already exists in the cart, update its quantity
-                item = existingCartItem.get();
-                item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
-            } else {
-                // If the item is new, create a new CartItem and add it to the cart
-                item = new CartItem();
-                item.setProductId(cartItemDTO.getProductId());
-                item.setQuantity(cartItemDTO.getQuantity());
-                // ... set other properties (price, name, etc.) based on productClient.getProductById()
-                item.setCart(cart);
-            }
+            CartItem item = getNewCartItem(cart, cartItemDTO, existingCartItem);
             return cartItemRepository.save(item);
         } catch (Exception e) {
             log.error("Unexpected error adding item to cart: {}", e.getMessage());
             throw e;
+        }
+    }
+
+    private static CartItem getNewCartItem(Cart cart, CartItemDTO cartItemDTO, Optional<CartItem> existingCartItem) {
+        CartItem item;
+        if (existingCartItem.isPresent()) {
+            // If the item already exists in the cart, update its quantity
+            item = existingCartItem.get();
+            item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
+        } else {
+            // If the item is new, create a new CartItem and add it to the cart
+            item = new CartItem();
+            item.setProductId(cartItemDTO.getProductId());
+            item.setQuantity(cartItemDTO.getQuantity());
+            item.setPrice(cartItemDTO.getPrice());
+            item.setCart(cart);
+        }
+        return item;
+    }
+
+    public void removeItem(Long itemId, Cart cart) {
+        Optional<CartItem> cartItemToRemove = cart.getItems().stream()
+                .filter(item -> item.getId().equals(itemId))
+                .findFirst();
+
+        if (cartItemToRemove.isPresent()) {
+            CartItem item = cartItemToRemove.get();
+            cart.removeItem(item); // Remove from the Cart's collection
+            cartItemRepository.delete(item);
+        } else {
+            log.error("Error removing item from cart: {}", itemId);
+            throw new ContentNotFoundException("Cart item not found with id: " + itemId);
         }
     }
 }
