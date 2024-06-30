@@ -49,7 +49,7 @@ public class CartItemService {
         return item;
     }
 
-    public void removeItem(Long itemId, Cart cart) {
+    public Cart removeItem(Long itemId, Cart cart) {
         Optional<CartItem> cartItemToRemove = cart.getItems().stream()
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst();
@@ -62,6 +62,7 @@ public class CartItemService {
             log.error("Error removing item from cart: {}", itemId);
             throw new ContentNotFoundException("Cart item not found with id: " + itemId);
         }
+        return cart;
     }
 
     public CartItem findById(Long itemId) {

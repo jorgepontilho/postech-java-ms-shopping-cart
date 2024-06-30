@@ -9,9 +9,9 @@ import com.postech.shoppingcart.model.Cart;
 import com.postech.shoppingcart.model.CartItem;
 import com.postech.shoppingcart.repository.CartRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -109,7 +109,7 @@ public class CartService {
             Cart cart = cartRepository.findById(cartId)
                     .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
 
-            cartItemService.removeItem(itemId, cart);
+            cart = cartItemService.removeItem(itemId, cart);
 
             // Recalculate cart total
             cart.setTotal(calculateCartTotal(cart.getItems()));
@@ -130,7 +130,10 @@ public class CartService {
     public void deleteCart(Long cartId) {
         try {
             cartRepository.deleteById(cartId);
-        } catch (Exception e) {
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Could not find item to delete: {}, {}",cartId, e.getMessage());
+            throw e;
+        }catch (Exception e) {
             log.error("Error deleting cart: {}, {}",cartId, e.getMessage());
             throw e;
         }
