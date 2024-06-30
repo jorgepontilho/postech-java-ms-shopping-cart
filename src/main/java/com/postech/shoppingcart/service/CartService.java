@@ -31,9 +31,6 @@ public class CartService {
         try {
             Cart newCart = CartMapper.INSTANCE.toCart(cartDTO);
 
-            //cart.setStatus("NEW");
-           // cart.setCreatedAt(LocalDateTime.now());
-
             Cart savedCart = cartRepository.save(newCart);
             return CartMapper.INSTANCE.toCartDTO(savedCart);
 
