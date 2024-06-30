@@ -77,8 +77,33 @@ public class CartService {
         }
     }
 
-    public CartDTO updateItemQuantity(String cartId, Long productId, int quantity) {
-        throw new NotImplementedException();
+    public CartDTO updateItemQuantity(Long cartId, Long itemId, int newQuantity) {
+        try {
+            Cart cart = cartRepository.findById(cartId)
+                    .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
+
+            CartItem cartItem = cartItemService.findById(itemId);
+
+            if (newQuantity <= 0) {
+                throw new IllegalArgumentException("Quantity must be greater than zero");
+            }
+
+            // Update quantity using CartItemService
+            cartItem = cartItemService.updateCartItemQuantity(cartItem, newQuantity);
+
+            cart.setTotal(calculateCartTotal(cart.getItems()));
+
+            cart = cartRepository.save(cart);
+
+            return CartMapper.INSTANCE.toCartDTO(cart);
+        } catch (ContentNotFoundException e) {
+            log.error("Error updating item quantity: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error updating item quantity: {}", e.getMessage());
+            throw e;
+        }
+
     }
 
     public CartDTO removeItemFromCart(Long cartId, Long itemId) {

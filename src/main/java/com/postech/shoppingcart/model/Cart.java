@@ -2,6 +2,8 @@ package com.postech.shoppingcart.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Entity
 @Data
+@Getter
+@Setter
 @Table(name = "cart")
 public class Cart {
 
@@ -19,7 +23,7 @@ public class Cart {
     @GeneratedValue
     private Long id;
     private Long userId;
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
     private BigDecimal total;
     @CreationTimestamp

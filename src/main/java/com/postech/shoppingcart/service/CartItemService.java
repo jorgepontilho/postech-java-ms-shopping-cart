@@ -56,11 +56,21 @@ public class CartItemService {
 
         if (cartItemToRemove.isPresent()) {
             CartItem item = cartItemToRemove.get();
-            cart.removeItem(item); // Remove from the Cart's collection
+            cart.removeItem(item);
             cartItemRepository.delete(item);
         } else {
             log.error("Error removing item from cart: {}", itemId);
             throw new ContentNotFoundException("Cart item not found with id: " + itemId);
         }
+    }
+
+    public CartItem findById(Long itemId) {
+        return cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + itemId));
+    }
+
+    public CartItem updateCartItemQuantity(CartItem cartItem, int newQuantity) {
+        cartItem.setQuantity(newQuantity);
+        return cartItemRepository.save(cartItem);
     }
 }

@@ -2,6 +2,7 @@ package com.postech.shoppingcart.controller;
 
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
+import com.postech.shoppingcart.exception.BadRequestException;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -103,6 +104,22 @@ public class CartController {
             log.error("Error removing item from cart: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while removing the item from the cart.");
+        }
+    }
+
+
+    @PutMapping("/{cartId}/items/{itemId}")
+    public ResponseEntity<?> updateItemQuantity( @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam int quantity) {
+        try {
+            if (quantity <= 0) {
+                throw new BadRequestException("Quantity must be greater than zero");
+            }
+
+            CartDTO updatedCart = cartService.updateItemQuantity(cartId, itemId, quantity);
+            return ResponseEntity.ok(updatedCart);
+        } catch (Exception e) {
+            log.error("Error updating item quantity: {}", e.getMessage());
+            throw e;
         }
     }
 

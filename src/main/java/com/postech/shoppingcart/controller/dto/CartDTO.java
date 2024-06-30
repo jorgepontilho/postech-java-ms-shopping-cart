@@ -1,18 +1,19 @@
 package com.postech.shoppingcart.controller.dto;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@Getter
+@Setter
 @RequiredArgsConstructor
-@ToString
 public class CartDTO {
 
     private Long id;
+    @NotNull
     private Long userId;
     private List<CartItemDTO> items;
     //private double subtotal;
