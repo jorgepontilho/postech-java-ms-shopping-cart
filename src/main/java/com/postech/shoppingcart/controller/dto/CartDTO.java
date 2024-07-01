@@ -16,8 +16,6 @@ public class CartDTO {
     @NotNull
     private Long userId;
     private List<CartItemDTO> items;
-    //private double subtotal;
-    //private double taxes;
     private BigDecimal total;
 
 }

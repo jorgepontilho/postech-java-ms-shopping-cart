@@ -2,13 +2,13 @@ package com.postech.shoppingcart.controller;
 
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
-import com.postech.shoppingcart.exception.BadRequestException;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,11 +33,10 @@ public class CartController {
             @ApiResponse(description = "Cart Invalid", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
             @ApiResponse(description = "User invalid", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Usuário não encontrado."))),
     })
-    public ResponseEntity<CartDTO> createCart(@RequestBody CartDTO cartDTO) {
+    public ResponseEntity<CartDTO> createCart(@Valid @RequestBody CartDTO cartDTO) {
         try {
-            log.info("create cart to user: {}", cartDTO.getUserId());
+            log.info("Creating cart for user: {}", cartDTO.getUserId());
             CartDTO createdCart = cartService.createCart(cartDTO);
-
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCart);
         }catch (Exception e){
             log.error("Error creating Cart ", e);
@@ -111,10 +110,6 @@ public class CartController {
     @PutMapping("/{cartId}/items/{itemId}")
     public ResponseEntity<?> updateItemQuantity( @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam int quantity) {
         try {
-            if (quantity <= 0) {
-                throw new BadRequestException("Quantity must be greater than zero");
-            }
-
             CartDTO updatedCart = cartService.updateItemQuantity(cartId, itemId, quantity);
             return ResponseEntity.ok(updatedCart);
         } catch (Exception e) {

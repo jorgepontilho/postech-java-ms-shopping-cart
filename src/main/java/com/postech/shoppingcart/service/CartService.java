@@ -2,7 +2,6 @@ package com.postech.shoppingcart.service;
 
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
-import com.postech.shoppingcart.exception.BadRequestException;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.mapper.CartMapper;
 import com.postech.shoppingcart.model.Cart;
@@ -10,7 +9,6 @@ import com.postech.shoppingcart.model.CartItem;
 import com.postech.shoppingcart.repository.CartRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -34,11 +32,8 @@ public class CartService {
             Cart savedCart = cartRepository.save(newCart);
             return CartMapper.INSTANCE.toCartDTO(savedCart);
 
-        } catch (DataIntegrityViolationException e) {
-            log.error("Error creating cart: {}", e.getMessage());
-            throw new BadRequestException();
         } catch (Exception e) {
-            log.error("Unexpected error creating cart: {}", e.getMessage());
+            log.error("Error creating cart: {}", e.getMessage());
             throw e;
         }
     }
