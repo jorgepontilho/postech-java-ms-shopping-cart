@@ -80,9 +80,8 @@ public class CartService {
                 throw new IllegalArgumentException("Quantity must be greater than zero");
             }
 
-            // Update quantity using CartItemService
             cartItem = cartItemService.updateCartItemQuantity(cartItem, newQuantity);
-
+            
             cart.setTotal(calculateCartTotal(cart.getItems()));
 
             cart = cartRepository.save(cart);

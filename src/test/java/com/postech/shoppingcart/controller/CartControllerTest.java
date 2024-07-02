@@ -6,18 +6,20 @@ import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.mapper.CartMapper;
 import com.postech.shoppingcart.model.Cart;
+import com.postech.shoppingcart.repository.CartRepository;
 import com.postech.shoppingcart.service.CartService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CartController.class)
@@ -70,13 +72,43 @@ public class CartControllerTest {
                 .andExpect(content().string("Campos inválidos ou faltando: userId"));
 
     }
+    /* Delete Cart*/
+    @Test
+    public void testDeleteCart_Success() throws Exception {
+        Long cartId = 1L;
+
+        mockMvc.perform(delete("/carts/{cartId}", cartId))
+                .andExpect(status().isNoContent());
+
+        verify(cartService, times(1)).deleteCart(cartId);
+    }
+
+    @Test
+    public void testDeleteCart_CartNotFound() throws Exception {
+        Long cartId = 1L;
+        doThrow(EmptyResultDataAccessException.class).when(cartService).deleteCart(cartId);
+
+        mockMvc.perform(delete("/carts/{cartId}", cartId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteCart_UnexpectedError() throws Exception {
+        Long cartId = 1L;
+
+        doThrow(RuntimeException.class).when(cartService).deleteCart(cartId);
+
+        mockMvc.perform(delete("/carts/{cartId}", cartId))
+                .andExpect(status().isInternalServerError());
+    }
+
 
     @Test
     public void handleContentNotFoundException() throws Exception {
         when(cartService.getCart(anyLong())).thenThrow(new ContentNotFoundException("Cart not found"));
 
         mockMvc.perform(get("/carts/123"))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string(""));
     }
 

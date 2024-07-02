@@ -28,6 +28,18 @@ public class TestUtils {
         return cartDTO;
     }
 
+    public static CartItem createTestCartItem() {
+        CartItem cartItem = new CartItem();
+        cartItem.setId(1L);
+        cartItem.setProductId(1L);
+        cartItem.setQuantity(2);
+        cartItem.setPrice(BigDecimal.valueOf(10.5));
+        Cart cart = createTestCart();
+        cartItem.setCart(cart);
+        return cartItem;
+    }
+
+
     public static CartItem createTestCartItem(Long id, Long productId, int quantity, BigDecimal price, Cart cart) {
         CartItem cartItem = new CartItem();
         cartItem.setId(id);
@@ -38,6 +50,14 @@ public class TestUtils {
         return cartItem;
     }
 
+    public static CartItemDTO createTestCartItemDTO() {
+        CartItemDTO cartItemDTO = new CartItemDTO();
+        cartItemDTO.setProductId(1L);
+        cartItemDTO.setQuantity(1);
+        cartItemDTO.setPrice(BigDecimal.valueOf(10.5));
+        return cartItemDTO;
+    }
+
     public static CartItemDTO createTestCartItemDTO(Long productId, int quantity, BigDecimal price) {
         CartItemDTO cartItemDTO = new CartItemDTO();
         cartItemDTO.setProductId(productId);
@@ -46,16 +66,24 @@ public class TestUtils {
         return cartItemDTO;
     }
 
+    public static List<CartItem> createTestCartItems() {
+        List<CartItem> items = new ArrayList<>();
+        Cart cart = createTestCart();
+        items.add(createTestCartItem(101L, 1L, 1, BigDecimal.valueOf(10.5), cart));
+        items.add(createTestCartItem(102L, 2L, 1, BigDecimal.valueOf(15.0), cart));
+        return items;
+    }
+
     public static List<CartItem> createTestCartItems(Cart cart) {
         List<CartItem> items = new ArrayList<>();
-        items.add(createTestCartItem(101L, 1L, 2, BigDecimal.valueOf(10.5), cart));
+        items.add(createTestCartItem(101L, 1L, 1, BigDecimal.valueOf(10.5), cart));
         items.add(createTestCartItem(102L, 2L, 1, BigDecimal.valueOf(15.0), cart));
         return items;
     }
 
     public static List<CartItemDTO> createTestCartItemDTOs() {
         List<CartItemDTO> items = new ArrayList<>();
-        items.add(createTestCartItemDTO(1L, 2, BigDecimal.valueOf(10.5)));
+        items.add(createTestCartItemDTO(1L, 1, BigDecimal.valueOf(10.5)));
         items.add(createTestCartItemDTO(2L, 1, BigDecimal.valueOf(15.0)));
         return items;
     }
