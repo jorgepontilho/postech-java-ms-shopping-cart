@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -35,9 +37,9 @@ public class CartController {
             @ApiResponse(description = "Cart Invalid", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
             @ApiResponse(description = "User invalid", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Usuário não encontrado."))),
     })
-    public ResponseEntity<CartDTO> createCart(@Valid @RequestBody CartDTO cartDTO) {
+    public ResponseEntity<CartDTO> createCart(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CartDTO cartDTO) {
         try {
-            log.info("Creating cart for user: {}", cartDTO.getUserId());
+            log.info("Creating cart for user: {} {}", cartDTO.getUserId(), userDetails.getUsername());
             CartDTO createdCart = cartService.createCart(cartDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCart);
         }catch (Exception e){
