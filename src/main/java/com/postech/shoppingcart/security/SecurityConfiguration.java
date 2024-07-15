@@ -26,14 +26,19 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authorizeConfig -> {
                     authorizeConfig.requestMatchers(
-                                    "/swagger-ui/**", "/swagger-resources/**",
+                                    "/swagger-ui", "/swagger-resources/**",
                                     "/v3/api-docs", "/v3/api-docs/**").permitAll();
 
-                    authorizeConfig.requestMatchers(HttpMethod.POST, "/carts")
+                    authorizeConfig
+                            .requestMatchers(
+                                    "/swagger-ui/**",
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui.html")
                             .permitAll();
 
                     authorizeConfig.requestMatchers("/carts", "/carts/**")
-                            .permitAll().anyRequest().authenticated();
+                            .permitAll()
+                            .anyRequest().authenticated();
 
                     //authorizeConfig.anyRequest().authenticated();
                 }).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
