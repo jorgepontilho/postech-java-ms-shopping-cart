@@ -36,6 +36,7 @@ public class CartController {
             @ApiResponse(description = "The new cart was created", responseCode = "201", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart Invalid", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
             @ApiResponse(description = "User invalid", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Usuário não encontrado."))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "401", content = @Content(schema = @Schema(type = "string", example = "Usuário não autenticado."))),
     })
     public ResponseEntity<?> createCart(HttpServletRequest request, @Valid @RequestBody CartDTO cartDTO) {
         try {

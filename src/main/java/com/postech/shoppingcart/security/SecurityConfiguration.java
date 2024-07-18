@@ -25,22 +25,16 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authorizeConfig -> {
-                    authorizeConfig.requestMatchers(
-                                    "/swagger-ui", "/swagger-resources/**",
-                                    "/v3/api-docs", "/v3/api-docs/**").permitAll();
-
                     authorizeConfig
                             .requestMatchers(
-                                    "/swagger-ui/**",
-                                    "/v3/api-docs/**",
-                                    "/swagger-ui.html")
+                                    "/swagger-ui/**", "/swagger-resources/**",
+                                    "/v3/api-docs", "/v3/api-docs/**", "/webjars/**","")
+                                    .permitAll();
+
+                    authorizeConfig
+                            .requestMatchers("/carts", "/carts/**")
                             .permitAll();
 
-                    authorizeConfig.requestMatchers("/carts", "/carts/**")
-                            .permitAll()
-                            .anyRequest().authenticated();
-
-                    //authorizeConfig.anyRequest().authenticated();
                 }).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
