@@ -31,7 +31,20 @@ Após a criação da rede, precisamos executar o comando abaixo para fazer o bui
 ````shell
 docker-compose up --build
 ````
-Assim que o processo for concluído, tanto a aplicação quanto o banco de dados estarão rodando em containers compartilhando a mesma rede.<br>
+Assim que o processo for concluído, tanto a aplicação quanto o banco de dados e também o Sonarqube estarão rodando em containers compartilhando a mesma rede.<br>
+
+Quando os containers já estiverem em pé e o Sonrqube operacional, precisamos configurar o Sonarqube para escanear o projeto:
+````shell
+mvn sonar:sonar
+````
+
+Para acessar o Sonarqube utilize as credenciais abaixo:</br>
+Login: admin</br>
+Password: admin</br>
+http://localhost:9001
+
+Será solicitado que redefina a senha. E após redefenir, poderá ver o dashboard do projeto.
+
 
 ## Documentação
 
