@@ -8,12 +8,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,10 +36,15 @@ public class CartController {
             @ApiResponse(description = "The new cart was created", responseCode = "201", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart Invalid", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
             @ApiResponse(description = "User invalid", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Usuário não encontrado."))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "401", content = @Content(schema = @Schema(type = "string", example = "Usuário não autenticado."))),
     })
-    public ResponseEntity<CartDTO> createCart(@Valid @RequestBody CartDTO cartDTO) {
+    public ResponseEntity<?> createCart(HttpServletRequest request, @Valid @RequestBody CartDTO cartDTO) {
         try {
-            log.info("Creating cart for user: {}", cartDTO.getUserId());
+            log.info("Creating cart for user: {} ", cartDTO.getUserId());
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
             CartDTO createdCart = cartService.createCart(cartDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCart);
         }catch (Exception e){
@@ -87,6 +94,7 @@ public class CartController {
     @PostMapping("/{cartId}/items")
     public ResponseEntity<?> addItem(@PathVariable Long cartId, @Valid @RequestBody CartItemDTO request) {
         try {
+
             CartDTO updatedCart = cartService.addItemToCart(cartId, request);
             return ResponseEntity.ok(updatedCart);
         } catch (ContentNotFoundException e) {
