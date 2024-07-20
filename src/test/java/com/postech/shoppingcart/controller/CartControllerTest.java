@@ -6,13 +6,11 @@ import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
 import com.postech.shoppingcart.mapper.CartMapper;
 import com.postech.shoppingcart.model.Cart;
-import com.postech.shoppingcart.repository.CartRepository;
-import com.postech.shoppingcart.service.CartService;
+import com.postech.shoppingcart.usecase.CartUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,7 +27,7 @@ public class CartControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CartService cartService;
+    private CartUseCase cartUseCase;
 
     @MockBean
     private CartMapper cartMapper;
@@ -42,7 +40,7 @@ public class CartControllerTest {
         CartDTO cartDTOoutput = cartDTOinput;
         cartDTOoutput.setId(1L);
 
-        when(cartService.createCart(cartDTOinput)).thenReturn(cartDTOoutput);
+        when(cartUseCase.createCart(cartDTOinput)).thenReturn(cartDTOoutput);
         when(cartMapper.toCartDTO(savedCart)).thenReturn(cartDTOoutput);
 
         // Act & Assert
@@ -62,7 +60,7 @@ public class CartControllerTest {
         CartDTO cartDTOoutput = cartDTOinput;
         cartDTOoutput.setId(1L);
 
-        when(cartService.createCart(cartDTOinput)).thenReturn(cartDTOoutput);
+        when(cartUseCase.createCart(cartDTOinput)).thenReturn(cartDTOoutput);
         when(cartMapper.toCartDTO(savedCart)).thenReturn(cartDTOoutput);
 
         // Act & Assert
@@ -80,13 +78,13 @@ public class CartControllerTest {
         mockMvc.perform(delete("/carts/{cartId}", cartId))
                 .andExpect(status().isNoContent());
 
-        verify(cartService, times(1)).deleteCart(cartId);
+        verify(cartUseCase, times(1)).deleteCart(cartId);
     }
 
     @Test
     public void testDeleteCart_CartNotFound() throws Exception {
         Long cartId = 1L;
-        doThrow(EmptyResultDataAccessException.class).when(cartService).deleteCart(cartId);
+        doThrow(EmptyResultDataAccessException.class).when(cartUseCase).deleteCart(cartId);
 
         mockMvc.perform(delete("/carts/{cartId}", cartId))
                 .andExpect(status().isNotFound());
@@ -96,7 +94,7 @@ public class CartControllerTest {
     public void testDeleteCart_UnexpectedError() throws Exception {
         Long cartId = 1L;
 
-        doThrow(RuntimeException.class).when(cartService).deleteCart(cartId);
+        doThrow(RuntimeException.class).when(cartUseCase).deleteCart(cartId);
 
         mockMvc.perform(delete("/carts/{cartId}", cartId))
                 .andExpect(status().isInternalServerError());
@@ -105,7 +103,7 @@ public class CartControllerTest {
 
     @Test
     public void handleContentNotFoundException() throws Exception {
-        when(cartService.getCart(anyLong())).thenThrow(new ContentNotFoundException("Cart not found"));
+        when(cartUseCase.getCart(anyLong())).thenThrow(new ContentNotFoundException("Cart not found"));
 
         mockMvc.perform(get("/carts/123"))
                 .andExpect(status().isNotFound())

@@ -5,7 +5,7 @@ import com.postech.shoppingcart.TestUtils;
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
-import com.postech.shoppingcart.service.CartService;
+import com.postech.shoppingcart.usecase.CartUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,7 +28,7 @@ public class AddItemsTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CartService cartService;
+    private CartUseCase cartUseCase;
 
 
     @Test
@@ -40,7 +39,7 @@ public class AddItemsTest {
         expectedCartDTO.setItems(new ArrayList<CartItemDTO>());
         expectedCartDTO.getItems().add(cartItemDTO);
 
-        when(cartService.addItemToCart(cartId, cartItemDTO)).thenReturn(expectedCartDTO);
+        when(cartUseCase.addItemToCart(cartId, cartItemDTO)).thenReturn(expectedCartDTO);
 
         mockMvc.perform(post("/carts/{cartId}/items", cartId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -57,7 +56,7 @@ public class AddItemsTest {
         Long cartId = 1L;
         CartItemDTO cartItemDTO = TestUtils.createTestCartItemDTO();
 
-        doThrow(ContentNotFoundException.class).when(cartService).addItemToCart(cartId, cartItemDTO);
+        doThrow(ContentNotFoundException.class).when(cartUseCase).addItemToCart(cartId, cartItemDTO);
 
         mockMvc.perform(post("/carts/{cartId}/items", cartId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,7 +79,7 @@ public class AddItemsTest {
         Long cartId = 1L;
         CartItemDTO cartItemDTO = TestUtils.createTestCartItemDTO(1L, 2, BigDecimal.valueOf(10.5));
 
-        doThrow(RuntimeException.class).when(cartService).addItemToCart(cartId, cartItemDTO);
+        doThrow(RuntimeException.class).when(cartUseCase).addItemToCart(cartId, cartItemDTO);
 
         mockMvc.perform(post("/carts/{cartId}/items", cartId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +94,7 @@ public class AddItemsTest {
         Long itemId = 101L;
         CartDTO updatedCart = new CartDTO();
 
-        when(cartService.removeItemFromCart(cartId, itemId)).thenReturn(updatedCart);
+        when(cartUseCase.removeItemFromCart(cartId, itemId)).thenReturn(updatedCart);
 
         mockMvc.perform(delete("/carts/{cartId}/items/{itemId}", cartId, itemId))
                 .andExpect(status().isOk())
@@ -107,7 +106,7 @@ public class AddItemsTest {
         Long cartId = 1L;
         Long itemId = 101L;
 
-        when(cartService.removeItemFromCart(cartId, itemId)).thenThrow(ContentNotFoundException.class);
+        when(cartUseCase.removeItemFromCart(cartId, itemId)).thenThrow(ContentNotFoundException.class);
 
         mockMvc.perform(delete("/carts/{cartId}/items/{itemId}", cartId, itemId))
                 .andExpect(status().isNotFound());
@@ -119,7 +118,7 @@ public class AddItemsTest {
         Long itemId = 101L;
         CartDTO existingCart = TestUtils.createTestCartDTO();
 
-        when(cartService.removeItemFromCart(cartId, itemId)).thenThrow(new ContentNotFoundException("Item not found"));
+        when(cartUseCase.removeItemFromCart(cartId, itemId)).thenThrow(new ContentNotFoundException("Item not found"));
 
         mockMvc.perform(delete("/carts/{cartId}/items/{itemId}", cartId, itemId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +131,7 @@ public class AddItemsTest {
         Long cartId = 1L;
         Long itemId = 101L;
 
-        when(cartService.removeItemFromCart(cartId, itemId)).thenThrow(new RuntimeException("Some error"));
+        when(cartUseCase.removeItemFromCart(cartId, itemId)).thenThrow(new RuntimeException("Some error"));
 
         mockMvc.perform(delete("/carts/{cartId}/items/{itemId}", cartId, itemId))
                 .andExpect(status().isInternalServerError());
@@ -148,7 +147,7 @@ public class AddItemsTest {
         updatedCartDTO.setItems(TestUtils.createTestCartItemDTOs());
         updatedCartDTO.getItems().get(0).setQuantity(newQuantity);
 
-        when(cartService.updateItemQuantity(cartId, itemId, newQuantity)).thenReturn(updatedCartDTO);
+        when(cartUseCase.updateItemQuantity(cartId, itemId, newQuantity)).thenReturn(updatedCartDTO);
 
         mockMvc.perform(put("/carts/{cartId}/items/{itemId}?quantity={quantity}", cartId, itemId, newQuantity))
                 .andExpect(status().isOk())
@@ -162,7 +161,7 @@ public class AddItemsTest {
         Long itemId = 101L;
         int newQuantity = 3;
 
-        when(cartService.updateItemQuantity(cartId, itemId, newQuantity))
+        when(cartUseCase.updateItemQuantity(cartId, itemId, newQuantity))
                 .thenThrow(ContentNotFoundException.class);
 
         mockMvc.perform(put("/carts/{cartId}/items/{itemId}?quantity={quantity}", cartId, itemId, newQuantity))
@@ -176,7 +175,7 @@ public class AddItemsTest {
         Long itemId = 101L;
         int newQuantity = 3;
 
-        when(cartService.updateItemQuantity(cartId, itemId, newQuantity))
+        when(cartUseCase.updateItemQuantity(cartId, itemId, newQuantity))
                 .thenThrow(new ContentNotFoundException("Item not found"));
 
         mockMvc.perform(put("/carts/{cartId}/items/{itemId}?quantity={quantity}", cartId, itemId, newQuantity))
@@ -199,7 +198,7 @@ public class AddItemsTest {
         Long itemId = 101L;
         int newQuantity = 3;
 
-        when(cartService.updateItemQuantity(cartId, itemId, newQuantity))
+        when(cartUseCase.updateItemQuantity(cartId, itemId, newQuantity))
                 .thenThrow(new RuntimeException("Some error"));
 
         mockMvc.perform(put("/carts/{cartId}/items/{itemId}?quantity={quantity}", cartId, itemId, newQuantity))

@@ -1,4 +1,4 @@
-package com.postech.shoppingcart.service;
+package com.postech.shoppingcart.usecase;
 
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CartItemService {
+public class CartItemUseCase {
 
     private final CartItemRepository cartItemRepository;
 

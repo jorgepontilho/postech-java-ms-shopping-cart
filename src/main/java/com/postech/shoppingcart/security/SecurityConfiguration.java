@@ -33,7 +33,7 @@ public class SecurityConfiguration {
 
                     authorizeConfig
                             .requestMatchers("/carts", "/carts/**")
-                            .permitAll();
+                            .permitAll().anyRequest().authenticated();
 
                 }).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

@@ -3,7 +3,7 @@ package com.postech.shoppingcart.controller;
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
 import com.postech.shoppingcart.exception.ContentNotFoundException;
-import com.postech.shoppingcart.service.CartService;
+import com.postech.shoppingcart.usecase.CartUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/carts")
 public class CartController {
 
-    private final CartService cartService;
+    private final CartUseCase cartUseCase;
 
     @Autowired
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
+    public CartController(CartUseCase cartUseCase) {
+        this.cartUseCase = cartUseCase;
     }
 
     @PostMapping
@@ -45,7 +45,7 @@ public class CartController {
                 return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
                         .body(request.getAttribute("error"));
             }
-            CartDTO createdCart = cartService.createCart(cartDTO);
+            CartDTO createdCart = cartUseCase.createCart(cartDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCart);
         }catch (Exception e){
             log.error("Error creating Cart ", e);
@@ -60,7 +60,7 @@ public class CartController {
     @GetMapping("/{cartId}")
     public ResponseEntity<CartDTO> getCart(@PathVariable Long cartId) {
         try {
-            CartDTO cartDTO = cartService.getCart(cartId);
+            CartDTO cartDTO = cartUseCase.getCart(cartId);
             return ResponseEntity.ok(cartDTO);
         } catch (Exception e) {
             log.error("Error getting cart ", e);
@@ -77,7 +77,7 @@ public class CartController {
 
         log.info("Deleting cart {}", cartId);
         try {
-            cartService.deleteCart(cartId);
+            cartUseCase.deleteCart(cartId);
         }  catch (EmptyResultDataAccessException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class CartController {
     public ResponseEntity<?> addItem(@PathVariable Long cartId, @Valid @RequestBody CartItemDTO request) {
         try {
 
-            CartDTO updatedCart = cartService.addItemToCart(cartId, request);
+            CartDTO updatedCart = cartUseCase.addItemToCart(cartId, request);
             return ResponseEntity.ok(updatedCart);
         } catch (ContentNotFoundException e) {
             log.error("Error adding item, cart not found {}", e.getMessage());
@@ -110,7 +110,7 @@ public class CartController {
     @DeleteMapping("/{cartId}/items/{itemId}")
     public ResponseEntity<?> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
         try {
-            CartDTO updatedCart = cartService.removeItemFromCart(cartId, itemId);
+            CartDTO updatedCart = cartUseCase.removeItemFromCart(cartId, itemId);
             return ResponseEntity.ok(updatedCart);
         } catch (ContentNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -126,7 +126,7 @@ public class CartController {
     public ResponseEntity<?> updateItemQuantity( @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam @Min(value = 0) int quantity) {
         try {
             if (quantity > 0) {
-                CartDTO updatedCart = cartService.updateItemQuantity(cartId, itemId, quantity);
+                CartDTO updatedCart = cartUseCase.updateItemQuantity(cartId, itemId, quantity);
                 return ResponseEntity.ok(updatedCart);
             } else {
                 log.error("invalid quantity [{}] for cart {}", quantity, cartId);

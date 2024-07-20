@@ -1,4 +1,4 @@
-package com.postech.shoppingcart.service;
+package com.postech.shoppingcart.usecase;
 
 import com.postech.shoppingcart.controller.dto.CartDTO;
 import com.postech.shoppingcart.controller.dto.CartItemDTO;
@@ -17,12 +17,12 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class CartService {
+public class CartUseCase {
 
     @Autowired
     private CartRepository cartRepository;
     @Autowired
-    private CartItemService cartItemService;
+    private CartItemUseCase cartItemUseCase;
 
 
     public CartDTO createCart(CartDTO cartDTO) {
@@ -55,7 +55,7 @@ public class CartService {
                     .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
 
             // Validate cartItemDTO ( product exists)
-            CartItem cartItem = cartItemService.createOrUpdateCartItem(cart, cartItemDTO);
+            CartItem cartItem = cartItemUseCase.createOrUpdateCartItem(cart, cartItemDTO);
 
             cart.getItems().add(cartItem);
             // Recalculate cart total
@@ -74,13 +74,13 @@ public class CartService {
             Cart cart = cartRepository.findById(cartId)
                     .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
 
-            CartItem cartItem = cartItemService.findById(itemId);
+            CartItem cartItem = cartItemUseCase.findById(itemId);
 
             if (newQuantity <= 0) {
                 throw new IllegalArgumentException("Quantity must be greater than zero");
             }
 
-            cartItem = cartItemService.updateCartItemQuantity(cartItem, newQuantity);
+            cartItem = cartItemUseCase.updateCartItemQuantity(cartItem, newQuantity);
             
             cart.setTotal(calculateCartTotal(cart.getItems()));
 
@@ -103,7 +103,7 @@ public class CartService {
             Cart cart = cartRepository.findById(cartId)
                     .orElseThrow(() -> new ContentNotFoundException("Cart not found with id: " + cartId));
 
-            cart = cartItemService.removeItem(itemId, cart);
+            cart = cartItemUseCase.removeItem(itemId, cart);
 
             // Recalculate cart total
             cart.setTotal(calculateCartTotal(cart.getItems()));
