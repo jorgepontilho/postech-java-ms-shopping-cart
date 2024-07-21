@@ -89,7 +89,7 @@ public class CartController {
 
     @Operation(summary = "Add new item to cart", responses = {
             @ApiResponse(description = "The cart item was added", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
-            @ApiResponse(description = "Cart does not exists", responseCode = "204", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
+            @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
     })
     @PostMapping("/{cartId}/items")
     public ResponseEntity<?> addItem(@PathVariable Long cartId, @Valid @RequestBody CartItemDTO request) {
@@ -107,6 +107,10 @@ public class CartController {
     }
 
 
+    @Operation(summary = "Delete a Item from a Cart", responses = {
+            @ApiResponse(description = "The cart item was deleted", responseCode = "204", content = @Content(schema = @Schema(implementation = CartDTO.class))),
+            @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
+    })
     @DeleteMapping("/{cartId}/items/{itemId}")
     public ResponseEntity<?> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
         try {
@@ -122,6 +126,10 @@ public class CartController {
     }
 
 
+    @Operation(summary = "Update item quantity", responses = {
+            @ApiResponse(description = "The cart item was updated", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
+            @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
+    })
     @PutMapping("/{cartId}/items/{itemId}")
     public ResponseEntity<?> updateItemQuantity( @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam @Min(value = 0) int quantity) {
         try {
