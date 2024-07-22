@@ -36,15 +36,15 @@ public class CartController {
             @ApiResponse(description = "The new cart was created", responseCode = "201", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart Invalid", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
             @ApiResponse(description = "User invalid", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Usuário não encontrado."))),
-            @ApiResponse(description = "User Not Authenticated", responseCode = "401", content = @Content(schema = @Schema(type = "string", example = "Usuário não autenticado."))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
     })
     public ResponseEntity<?> createCart(HttpServletRequest request, @Valid @RequestBody CartDTO cartDTO) {
         try {
-            log.info("Creating cart for user: {} ", cartDTO.getUserId());
             if (request.getAttribute("error") != null) {
                 return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
                         .body(request.getAttribute("error"));
             }
+            log.info("Creating cart for user: {} ", cartDTO.getUserId());
             CartDTO createdCart = cartUseCase.createCart(cartDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCart);
         }catch (Exception e){
@@ -56,10 +56,17 @@ public class CartController {
     @Operation(summary = "Request for find a Cart", responses = {
             @ApiResponse(description = "The cart found", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart does not exists", responseCode = "204", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
+
     })
     @GetMapping("/{cartId}")
-    public ResponseEntity<CartDTO> getCart(@PathVariable Long cartId) {
+    public ResponseEntity<?> getCart(HttpServletRequest request, @PathVariable Long cartId) {
         try {
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
+            log.info("Getting cart for user: {} ", cartId);
             CartDTO cartDTO = cartUseCase.getCart(cartId);
             return ResponseEntity.ok(cartDTO);
         } catch (Exception e) {
@@ -71,12 +78,19 @@ public class CartController {
     @Operation(summary = "Delete a Cart", responses = {
             @ApiResponse(description = "The cart was deleted", responseCode = "204", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart does not exists", responseCode = "204", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
+
     })
     @DeleteMapping("/{cartId}")
-    public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
+    public ResponseEntity<?> deleteCart(HttpServletRequest request, @PathVariable Long cartId) {
 
-        log.info("Deleting cart {}", cartId);
         try {
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
+
+            log.info("Deleting cart {}", cartId);
             cartUseCase.deleteCart(cartId);
         }  catch (EmptyResultDataAccessException e) {
             return ResponseEntity.notFound().build();
@@ -90,12 +104,17 @@ public class CartController {
     @Operation(summary = "Add new item to cart", responses = {
             @ApiResponse(description = "The cart item was added", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
     })
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<?> addItem(@PathVariable Long cartId, @Valid @RequestBody CartItemDTO request) {
+    public ResponseEntity<?> addItem(HttpServletRequest request, @PathVariable Long cartId, @Valid @RequestBody CartItemDTO cartItemDTO) {
         try {
-
-            CartDTO updatedCart = cartUseCase.addItemToCart(cartId, request);
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
+            log.info("Adding item to cart {}", cartId);
+            CartDTO updatedCart = cartUseCase.addItemToCart(cartId, cartItemDTO);
             return ResponseEntity.ok(updatedCart);
         } catch (ContentNotFoundException e) {
             log.error("Error adding item, cart not found {}", e.getMessage());
@@ -110,10 +129,17 @@ public class CartController {
     @Operation(summary = "Delete a Item from a Cart", responses = {
             @ApiResponse(description = "The cart item was deleted", responseCode = "204", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Campos inválidos ou faltando"))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
     })
     @DeleteMapping("/{cartId}/items/{itemId}")
-    public ResponseEntity<?> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
+    public ResponseEntity<?> removeItemFromCart(HttpServletRequest request, @PathVariable Long cartId, @PathVariable Long itemId) {
         try {
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
+
+            log.info("Removing item from cart {}", cartId);
             CartDTO updatedCart = cartUseCase.removeItemFromCart(cartId, itemId);
             return ResponseEntity.ok(updatedCart);
         } catch (ContentNotFoundException e) {
@@ -129,10 +155,16 @@ public class CartController {
     @Operation(summary = "Update item quantity", responses = {
             @ApiResponse(description = "The cart item was updated", responseCode = "200", content = @Content(schema = @Schema(implementation = CartDTO.class))),
             @ApiResponse(description = "Cart does not exists", responseCode = "404", content = @Content(schema = @Schema(type = "string", example = "Carrinho não encontrado"))),
+            @ApiResponse(description = "User Not Authenticated", responseCode = "400", content = @Content(schema = @Schema(type = "string", example = "Bearer token inválido"))),
     })
     @PutMapping("/{cartId}/items/{itemId}")
-    public ResponseEntity<?> updateItemQuantity( @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam @Min(value = 0) int quantity) {
+    public ResponseEntity<?> updateItemQuantity(HttpServletRequest request, @PathVariable Long cartId, @PathVariable Long itemId, @RequestParam @Min(value = 0) int quantity) {
         try {
+            if (request.getAttribute("error") != null) {
+                return ResponseEntity.status((HttpStatusCode) request.getAttribute("error_code"))
+                        .body(request.getAttribute("error"));
+            }
+            log.info("Updating item quantity {}", itemId);
             if (quantity > 0) {
                 CartDTO updatedCart = cartUseCase.updateItemQuantity(cartId, itemId, quantity);
                 return ResponseEntity.ok(updatedCart);
